@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stopwatch & Clock (Indigo Stopwatch Theme)</title>
+
+<style>
+  :root {
+    --clock-bg: rgba(200, 170, 255, 0.2); 
+    --stopwatch-bg: #2c3e50; 
+    --button-color: #2980b9; 
+    --button-hover: #3498db; 
+    --button-text: #fff;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('https://res.cloudinary.com/dfylqjh8u/image/upload/v1746948451/WhatsApp_Image_2025-05-11_at_12.57.03_35e9ff2d_q4ncvl.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+  }
+
+  .card {
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    width: 280px;
+    text-align: center;
+  }
+
+  .clock {
+    background: var(--clock-bg);
+    backdrop-filter: blur(10px);
+  }
+
+  .stopwatch {
+    background: var(--stopwatch-bg);
+    color: white;
+    backdrop-filter: blur(10px);
+  }
+
+  .card h2 {
+    margin-bottom: 15px;
+    font-size: 20px;
+  }
+
+  #current-time, #stopwatch-time {
+    font-size: 36px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  .controls button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 50px;
+    background: var(--button-color);
+    color: var(--button-text);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .controls button:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    max-height: 100px;
+    overflow-y: auto;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+  ul li {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    margin-bottom: 5px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card clock">
+    <h2>Current Time</h2>
+    <div id="current-time">00:00:00</div>
+  </div>
+
+  <div class="card stopwatch">
+    <h2>Stopwatch</h2>
+    <div id="stopwatch-time">00:00:00.000</div>
+    <div class="controls">
+      <button onclick="startStopwatch()" id="start-stop-btn">Start</button>
+      <button onclick="lapStopwatch()">Lap</button>
+      <button onclick="resetStopwatch()">Reset</button>
+    </div>
+    <ul id="laps"></ul>
+  </div>
+</div>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById("current-time").textContent = `${hours}:${minutes}:${seconds}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  let stopwatchInterval;
+  let stopwatchRunning = false;
+  let stopwatchTime = 0;
+
+  function startStopwatch() {
+    if (!stopwatchRunning) {
+      stopwatchRunning = true;
+      document.getElementById("start-stop-btn").textContent = "Stop";
+      const startTime = Date.now() - stopwatchTime;
+
+      stopwatchInterval = setInterval(() => {
+        stopwatchTime = Date.now() - startTime;
+        displayStopwatchTime();
+      }, 10);
+    } else {
+      stopwatchRunning = false;
+      document.getElementById("start-stop-btn").textContent = "Start";
+      clearInterval(stopwatchInterval);
+    }
+  }
+
+  function resetStopwatch() {
+    stopwatchRunning = false;
+    clearInterval(stopwatchInterval);
+    stopwatchTime = 0;
+    displayStopwatchTime();
+    document.getElementById("start-stop-btn").textContent = "Start";
+    document.getElementById("laps").innerHTML = '';
+  }
+
+  function lapStopwatch() {
+    if (stopwatchTime === 0) return;
+    const lapTime = formatTime(stopwatchTime);
+    const lapList = document.getElementById("laps");
+    const li = document.createElement('li');
+    li.textContent = `Lap: ${lapTime}`;
+    lapList.prepend(li);
+  }
+
+  function displayStopwatchTime() {
+    document.getElementById("stopwatch-time").textContent = formatTime(stopwatchTime);
+  }
+
+  function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    const milliseconds = String(ms % 1000).padStart(3, '0');
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+  }
+</script>
+
+</body>
+</html>
